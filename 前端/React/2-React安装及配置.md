@@ -1,5 +1,5 @@
 # 创建项目
->使用前端构建工具Vite，官方推荐首选 
+使用前端构建工具Vite，官方推荐首选 
 ```bash
 #创建指令
 npm create vite@latest first-react-app -- --template react
@@ -12,21 +12,21 @@ npm create vite@latest first-react-app -- --template react
 #安装依赖
 npm i
 
-#运行
+# 运行
 npm run dev
 ```
-#项目结构
-![目录结构](../images/React_image6.png)
-#入口文件
+# 项目结构
+![目录结构](../Images/React_image6.png)
+# 入口文件
 ```base
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 
-#ReactDOM.createRoot：React 18 新 API，启用并发特性。
-#<App />：渲染你的主组件。
-#<React.StrictMode>：开发模式下严格检查，帮助发现问题。
+# ReactDOM.createRoot：React 18 新 API，启用并发特性。
+# <App />：渲染你的主组件。
+# <React.StrictMode>：开发模式下严格检查，帮助发现问题。
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -49,21 +49,21 @@ createRoot(document.getElementById('root')).render(
 - Path Intellisense：导入路径自动补全（import时）
 - GitLens：GIt增强，查看代码提交历史
 >安装完成后，重启VS Code
+
 **3. 配置VS Code**
 - 在项目根目录创建settings.json（推荐项目级配置）文件，并添加以下内容
 ```base
-{
-  #保存时自动格式化
+  # 保存时自动格式化
   "editor.formatOnSave": true,
- #默认使用 Prettier 格式化
+  # 默认使用 Prettier 格式化
   "editor.defaultFormatter": "esbenp.prettier-vscode",
 
-  #ESLint 自动修复
+  # ESLint 自动修复
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },
 
-  #JSX/TSX 文件也应用 Prettier
+  # JSX/TSX 文件也应用 Prettier
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
@@ -71,12 +71,12 @@ createRoot(document.getElementById('root')).render(
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
 
-  #显示行号、缩进指南
+  # 显示行号、缩进指南
   "editor.rulers": [80],
   "editor.guides.indentation": true
-}
 ```
 >保存后生效。现在每次保存代码，Prettier 会自动格式化，ESLint 会自动修复常见问题。
+
 **4. 常用快捷键**
 - Ctrl + S：保存
 - Ctrl + /：注释行
