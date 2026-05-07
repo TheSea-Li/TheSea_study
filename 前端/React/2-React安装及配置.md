@@ -52,7 +52,12 @@ createRoot(document.getElementById('root')).render(
 >安装完成后，重启VS Code
 
 **3. 配置VS Code**
-- 在项目根目录创建settings.json（推荐项目级配置）文件，并添加以下内容
+1. 想要在保存时自动格式化只装插件不够，项目里必须安装Prettier
+
+```base
+npm install --save-dev prettier eslint-config-prettier
+```
+2. 在项目根目录创建.vscode文件夹，在该文件夹下创建settings.json（推荐项目级配置）文件，并添加以下内容
 ```base
 {
   # 保存时自动格式化
@@ -79,6 +84,7 @@ createRoot(document.getElementById('root')).render(
 }
 ```
 >保存后生效。现在每次保存代码，Prettier 会自动格式化，ESLint 会自动修复常见问题。
+
 
 **4. 常用快捷键**
 - Ctrl + S：保存
