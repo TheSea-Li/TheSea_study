@@ -42,6 +42,7 @@ createRoot(document.getElementById('root')).render(
 - 调试工具
 - 跨平台：Windows，macOS，Linux都完美支持
 - 免费开源
+
 **2. 必备插件**
 - ESLint：实时检查代码规范
 - Prettier - Code formatter：自动格式化代码，保持风格统一
@@ -53,6 +54,7 @@ createRoot(document.getElementById('root')).render(
 **3. 配置VS Code**
 - 在项目根目录创建settings.json（推荐项目级配置）文件，并添加以下内容
 ```base
+{
   # 保存时自动格式化
   "editor.formatOnSave": true,
   # 默认使用 Prettier 格式化
@@ -74,6 +76,7 @@ createRoot(document.getElementById('root')).render(
   # 显示行号、缩进指南
   "editor.rulers": [80],
   "editor.guides.indentation": true
+}
 ```
 >保存后生效。现在每次保存代码，Prettier 会自动格式化，ESLint 会自动修复常见问题。
 
