@@ -360,8 +360,182 @@ function ShoppingCart({ cart, user, loading, error }) {
 }
 ```
 
+# 3. 列表
+> React 没有专门的列表指令（如 Vue 的 v-for），而是直接使用 JavaScript 原生的 map() 方法遍历数组，将数据渲染成一组 UI 元素。
+>>核心：必须掌握的 key 属性：
+>>1. 什么是key? -> key 是 React 用于识别列表中每个元素的唯一标识，是列表渲染的必填属性。
+>>2. 为什么必须用key? -> React 的 Diff 算法 会通过 key 判断：
+>> 哪个元素被修改 / 删除 / 新增；
+>> 避免重复渲染，提升列表性能；
+>> 防止列表状态错乱（比如复选框、输入框的状态错位）。
+>>3. key的使用规则：
+>> 1. 唯一：在当前列表中，key 值不能重复；
+>> 2. 稳定：key 值不会随数据排序、增删而改变；
+>> 3. 优先使用后端返回的唯一 ID（如数据的 id 字段）。
 
+**代码示例**
+```jsx
+import React from 'react';
 
+function ProductList() {
+  // 真实接口返回的对象数组
+  const products = [
+    { id: 101, name: 'React 实战教程', price: 99, stock: 100 },
+    { id: 102, name: 'JavaScript 高级程序设计', price: 129, stock: 50 },
+    { id: 103, name: 'Vue 入门到精通', price: 89, stock: 80 },
+  ];
+
+  return (
+    <div className="product-list">
+      <h2>商品列表</h2>
+      <table border="1" cellPadding="8">
+        <thead>
+          <tr>
+            <th>商品ID</th>
+            <th>商品名称</th>
+            <th>价格</th>
+            <th>库存</th>
+          </tr>
+        </thead>
+        <tbody>
+          {/* 遍历对象数组，渲染表格行 */}
+          {products.map(item => (
+            <tr key={item.id}>
+              <td>{item.id}</td>
+              <td>{item.name}</td>
+              <td>¥{item.price}</td>
+              <td>{item.stock}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+export default ProductList;
+```
+
+**组件化（封装列表项）**
+>大型项目中，不会把所有逻辑写在一个组件里，会拆分列表项为独立组件，代码更易维护。
+```jsx
+// 子组件：列表项
+function TodoItem({ todo }) {
+  return (
+    <div style={{ margin: '8px 0' }}>
+      <span>{todo.title}</span>
+      <span style={{ color: todo.completed ? 'green' : 'red', marginLeft: '10px' }}>
+        {todo.completed ? '已完成' : '未完成'}
+      </span>
+    </div>
+  );
+}
+
+// 父组件：列表容器
+function TodoList() {
+  const todos = [
+    { id: 1, title: '学习 React 列表', completed: true },
+    { id: 2, title: '写一个待办项目', completed: false },
+  ];
+
+  return (
+    <div>
+      <h2>待办列表</h2>
+      {todos.map(todo => (
+        // key 写在遍历的最外层元素/组件上
+        <TodoItem key={todo.id} todo={todo} />
+      ))}
+    </div>
+  );
+}
+
+export default TodoList;
+```
+
+**动态列表（增、删、改）**
+> 列表最常用的功能是动态操作数据，配合 React 的 useState 实现。
+```jsx
+import React, { useState } from 'react';
+
+function DynamicTodoList() {
+  // 1. 定义列表状态
+  const [todos, setTodos] = useState([
+    { id: 1, title: '学习React列表', completed: false },
+    { id: 2, title: '掌握key属性', completed: true },
+  ]);
+  // 输入框状态
+  const [inputValue, setInputValue] = useState('');
+
+  // 2. 新增待办
+  const addTodo = () => {
+    if (!inputValue.trim()) return;
+    const newTodo = {
+      id: Date.now(), // 用时间戳生成唯一id
+      title: inputValue,
+      completed: false,
+    };
+    // 核心：不能直接修改原数组，必须返回新数组
+    setTodos([...todos, newTodo]);
+    setInputValue('');
+  };
+
+  // 3. 删除待办
+  const deleteTodo = (id) => {
+    // filter 过滤掉要删除的项，返回新数组
+    setTodos(todos.filter(item => item.id !== id));
+  };
+
+  // 4. 切换完成状态
+  const toggleTodo = (id) => {
+    setTodos(
+      todos.map(item => 
+        item.id === id ? { ...item, completed: !item.completed } : item
+      )
+    );
+  };
+
+  return (
+    <div style={{ padding: '20px' }}>
+      <h2>动态待办列表</h2>
+      {/* 新增输入框 */}
+      <input
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
+        placeholder="输入待办事项"
+      />
+      <button onClick={addTodo} style={{ marginLeft: '8px' }}>添加</button>
+
+      {/* 渲染列表 */}
+      <div style={{ marginTop: '20px' }}>
+        {todos.map(item => (
+          <div key={item.id} style={{ margin: '8px 0' }}>
+            <input
+              type="checkbox"
+              checked={item.completed}
+              onChange={() => toggleTodo(item.id)}
+            />
+            <span style={{ 
+              textDecoration: item.completed ? 'line-through' : 'none',
+              margin: '0 8px'
+            }}>
+              {item.title}
+            </span>
+            <button onClick={() => deleteTodo(item.id)}>删除</button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default DynamicTodoList;
+```
+
+**总结**
+> 1. React 列表渲染 = 数组.map () + 唯一 key；
+> 2. key 是核心：必须唯一、稳定，优先用数据 id；
+> 3. 状态不可变：操作列表（增删改）必须返回新数组，不修改原数据；
+> 4. 工程化：拆分列表项为独立组件，提升代码可维护性。
 
 
 
