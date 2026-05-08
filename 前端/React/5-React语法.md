@@ -537,6 +537,127 @@ export default DynamicTodoList;
 > 3. 状态不可变：操作列表（增删改）必须返回新数组，不修改原数据；
 > 4. 工程化：拆分列表项为独立组件，提升代码可维护性。
 
+# 4. 组件api
+> React 组件 API 就是组件自带的方法、属性、钩子，用来实现：状态管理、生命周期、数据通信、性能优化、DOM 操作等核心功能。
+## 1. 组件通用基础API
+- props（父组件 → 子组件 传数据）：组件的**只读属性**，用来接收父组件传递的数据，是组件通信最核心的方式。
+- children（插槽 / 子节点）：专门接收组件标签之间的内容，相当于「插槽」。
+```jsx
+function Card({ children }) {
+  return <div className="card">{children}</div>;
+}
+
+// 使用：标签内的内容会自动传给 children
+<Card>
+  <h2>标题</h2>
+  <p>内容</p>
+</Card>
+```
+
+- key（列表唯一标识）：React 用来识别列表元素，提升性能。
+- defaultProps（默认属性）：给 props 设置默认值，父组件没传数据时生效。
+```jsx
+// 函数组件默认 props
+Greeting.defaultProps = {
+  name: "游客"
+};
+```
+
+## 2. 函数组件 Hooks API（核心）
+> 这是现代 React 开发的灵魂，让函数组件拥有了状态、生命周期等能力，所有 API 都以 use 开头。
+- useState → 管理组件状态
+```jsx
+import { useState } from 'react';
+
+function Counter() {
+  // 定义状态：count(值) + setCount(修改状态的方法)
+  const [count, setCount] = useState(0);
+
+  return (
+    <div>
+      <p>计数：{count}</p>
+      <button onClick={() => setCount(count + 1)}>+1</button>
+    </div>
+  );
+}
+```
+
+- useEffect → 处理副作用（生命周期替代）
+> 处理异步请求、定时器、DOM 操作等副作用，替代了类组件的挂载 / 更新 / 卸载生命周期。
+```jsx
+import { useEffect, useState } from 'react';
+
+function UserList() {
+  // 组件挂载时执行（空依赖）
+  useEffect(() => {
+    console.log("组件挂载完成！");
+    // 模拟接口请求
+    fetch("/api/users");
+
+    // 清理函数：组件卸载时执行
+    return () => console.log("组件卸载！");
+  }, []); // 依赖数组：空 = 只执行一次
+
+  return <div>用户列表</div>;
+}
+```
+
+- useRef → 获取 DOM / 保存可变值
+> 获取真实 DOM 元素（操作原生 DOM），保存不需要触发渲染的可变数据。
+```jsx
+import { useRef } from 'react';
+
+function InputFocus() {
+  const inputRef = useRef(null);
+
+  const focus = () => {
+    // 直接操作 DOM 聚焦
+    inputRef.current.focus();
+  };
+
+  return (
+    <div>
+      <input ref={inputRef} />
+      <button onClick={focus}>聚焦输入框</button>
+    </div>
+  );
+}
+```
+
+- useContext → 跨组件通信
+> 作用：跳过中间组件，直接祖孙组件传值（解决 props 层层传递问题）。
+
+- useMemo / useCallback → 性能优化
+> 作用：缓存计算结果 / 函数，避免组件重复渲染，优化大型列表 / 复杂组件。
+
+## 3. 类组件 API（了解即可）
+- this.state / this.setState() （管理状态）
+> useState替代
+
+- 生命周期方法：
+componentDidMount()：组件挂载后执行
+componentDidUpdate()：组件更新后执行
+componentWillUnmount()：组件卸载前执行
+> 以上全部被 useEffect 
+
+- this.props（接收父组件数据。）
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
