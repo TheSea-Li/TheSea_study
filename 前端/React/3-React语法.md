@@ -78,7 +78,7 @@ return (
 >>- 坏习惯：用 index 作为 key（key={index}）——当列表顺序变化时，会导致不必要的重渲染或状态丢失。
 >>- 最佳实践：用数据中的唯一 ID（如数据库 id）。
 
-#3. 样式处理
+#3. 样式
 - 内联样式
 ```js
 return (
@@ -128,5 +128,17 @@ return (
     <h3 className={styles.title}>标题</h3>
     <p className={styles.content}>内容</p>
   </div>
+);
+```
+
+- 数组：JSX 允许在模板中插入数组，数组会自动展开所有成员
+```js
+var arr = [
+  <h1>菜鸟教程</h1>,
+  <h2>学的不仅是技术，更是梦想！</h2>,
+];
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(
+  <div>{arr}</div>
 );
 ```
