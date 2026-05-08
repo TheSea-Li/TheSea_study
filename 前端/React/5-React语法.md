@@ -695,14 +695,84 @@ export default function LifeCycle() {
 
 ![生命周期核心用法](../Images/React_image8.png)
 
+# 6. React AJAX
+> AJAX（Asynchronous JavaScript and XML）是一种在不重新加载整个页面的情况下，与服务器交换数据并异步更新部分网页的技术。在 React 组件中，使用 AJAX 技术请求后端接口，把动态数据渲染到页面上。
+>> 1. axios（推荐）：第三方库，语法简单、功能强大
+>> 2. fetch：浏览器原生自带，无需安装，但写法繁琐
 
+## axios写法
+**步骤1：安装axios**
+```bash
+npm install axios
+```
 
+**步骤2：核心规则**
+> React 中发送 AJAX 请求必须放在 useEffect 里！
+>> 原因：组件挂载完成后，再去请求数据（符合生命周期）
 
+**步骤3：示例代码**
+```js
+import { useState, useEffect } from 'react';
+// 1. 引入 axios
+import axios from 'axios';
 
+export default function RankList() {
+  // 2. 定义状态：存储列表数据
+  const [userList, setUserList] = useState([]);
+  // 可选：加载状态、错误状态（提升体验）
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
+  // 3. useEffect 发送 AJAX 请求（挂载时执行一次）
+  useEffect(() => {
+    // 定义请求函数
+    const getUserList = async () => {
+      try {
+        // 4. 发送 GET 请求（这就是 AJAX！）
+        // 这里用免费测试接口，真实项目写你的后端接口
+        const res = await axios.get('https://jsonplaceholder.typicode.com/users（接口）');
+        
+        // 5. 请求成功，把数据存到状态里
+        setUserList(res.data);
+        setLoading(false); // 关闭加载
+      } catch (err) {
+        // 请求失败
+        setError('数据请求失败');
+        setLoading(false);
+      }
+    };
 
+    // 执行请求
+    getUserList();
+  }, []); // 空依赖：只在挂载时请求一次
 
+  // 6. 渲染页面
+  if (loading) return <div>加载中...</div>;
+  if (error) return <div>{error}</div>;
 
+  return (
+    <div>
+      <h2>排行榜</h2>
+      <ul>
+        {/* 用请求回来的数据渲染列表 */}
+        {userList.map((item) => (
+          <li key={item.id}>{item.name}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+```
+
+## fetch写法
+> 浏览器自带，不用安装，但写法更麻烦：
+```jsx
+useEffect(() => {
+  fetch('https://jsonplaceholder.typicode.com/users')
+    .then(res => res.json())
+    .then(data => setUserList(data))
+}, []);
+```
 
 
 
