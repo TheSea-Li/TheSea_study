@@ -84,8 +84,93 @@ root.render(
 > ***注意，原生 HTML 元素名以小写字母开头，而自定义的 React 类名以大写字母开头，比如 HelloMessage 不能写成 helloMessage。除此之外还需要注意组件类只能包含一个顶层标签，否则也会报错。***
 
 # 3.Props（属性）
- 
+ >Props 是组件之间传递数据的方式，类似于函数的参数。
 
+- Props类型：Props 可以是任何 JavaScript 值
+```js
+function Demo() {
+  const user = { name: "Alice", age: 25 };
+  const numbers = [1, 2, 3, 4, 5];
+  const handleClick = () => alert("Clicked!");
+  return (
+    <MyComponent
+      // 字符串
+      title="Hello"
+      // 数字
+      count={42}
+      // 布尔值
+      isActive={true}
+      // 数组
+      items={numbers}
+      // 对象
+      user={user}
+      // 函数
+      onClick={handleClick}
+      // JSX
+      children={<p>This is content</p>}
+    />
+  );
+}
+```
+
+- Props的不可变性：永远不要修改 props！
+```js
+// 错误：修改 props
+function BadComponent(props) {
+  props.name = "Changed"; // 绝对不要这样做！
+  return <h1>{props.name}</h1>;
+}
+// 正确：将 props 视为只读
+function GoodComponent({ name }) {
+  const displayName = name.toUpperCase(); // 创建新值
+  return <h1>{displayName}</h1>;
+}
+```
+
+- Props的基础用法和解构
+
+1. 基础用法
+```js
+// 父组件传递 props
+function App() {
+  return (
+    <div>
+      <Greeting name="Alice" age={25} />
+      <Greeting name="Bob" age={30} />
+    </div>
+  );
+}
+// 子组件接收 props
+function Greeting(props) {
+  return (
+    <div>
+      <h1>Hello, {props.name}!</h1>
+      <p>Age: {props.age}</p>
+    </div>
+  );
+}
+```
+
+2. 解构用法
+```js
+// 推荐：直接解构
+function Greeting({ name, age }) {
+  return (
+    <div>
+      <h1>Hello, {name}!</h1>
+      <p>Age: {age}</p>
+    </div>
+  );
+}
+// 带默认值的解构
+function Button({ text = "Submit", variant = "primary", disabled = false }) {
+  return (
+    <button className={variant} disabled={disabled}>
+      {text}
+    </button>
+  );
+}
+```
 
 
 
