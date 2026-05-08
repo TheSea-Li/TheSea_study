@@ -31,6 +31,7 @@ export default Welcome;
 import React, { Component } from 'react';
 
 class Welcome extends Component {
+ // render() 是类组件中唯一必须实现的方法，它的作用是告诉 React 当前组件要渲染什么内容。每次 state 或 props 改变时，render() 会重新执行
   render() {
     return <h1>Hello, {this.props.name}!</h1>;
   }
@@ -66,6 +67,7 @@ root.render(
      <App />
 );
 ```
+>项目中推荐使用函数组件 + Hooks（更简洁、现代）
 
 ## 测试实例
 >接下来封装一个输出 "Hello World！" 的组件，组件名为 HelloMessage
@@ -382,8 +384,163 @@ root.render(
 # 8. 数据自顶向下流动
 >父组件或子组件都不能知道某个组件是有状态还是无状态，并且它们不应该关心某组件是被定义为一个函数还是一个类。这就是为什么状态通常被称为局部或封装。 除了拥有并设置它的组件外，其它组件不可访问。这通常被称为**自顶向下**或**单向数据流**。 任何状态始终由某些特定组件所有，并且从该状态导出的任何数据或 UI 只能影响树中下方的组件。
 
+# 9. Props
+>在 React 中，Props（属性）是用于将数据从父组件传递到子组件的机制，Props 是只读的，子组件不能直接修改它们，而是应该由父组件来管理和更新。state 和 props 主要的区别在于 props 是不可变的，而 state 可以根据与用户交互来改变。这就是为什么有些容器组件需要定义 state 来更新和修改数据。 而子组件只能通过 props 来传递数据。
 
+## 默认Props
+- 函数组件：通过设置参数默认值也可以通过defaultProps属性设置
+- 类组件：defaultProps 属性为 props 设置默认值
+```js
+class HelloMessage extends React.Component {
+  render() {
+    return (
+      <h1>Hello, {this.props.name}</h1>
+    );
+  }
+}
+ 
+HelloMessage.defaultProps = {
+  name: 'Runoob'
+};
+```
 
+## propTypes 验证
+>propTypes 是 React 提供的一种工具，用于对组件的 props 进行类型检查。
+在 React 中，propTypes 作为组件的一个静态属性来定义。首先，你需要安装 prop-types 包：
+```bash
+npm install prop-types
+```
+然后，在你的组件文件中引入 prop-types，并定义 propTypes 属性。
+- 基础类型验证
+```js
+import PropTypes from 'prop-types';
+
+function UserProfile({ name, age, isActive, email, id }) {
+  return (
+    <div>
+      <h2>{name}</h2>
+      <p>年龄: {age}</p>
+      <p>状态: {isActive ? '激活' : '未激活'}</p>
+      <p>邮箱: {email}</p>
+      <p>ID: {id}</p>
+    </div>
+  );
+}
+
+UserProfile.propTypes = {
+  // 基础类型
+  name: PropTypes.string,        // 字符串
+  age: PropTypes.number,         // 数字
+  isActive: PropTypes.bool,      // 布尔值
+  email: PropTypes.string,       // 字符串
+  id: PropTypes.number,          // 数字
+  
+  // 可选链式写法
+  address: PropTypes.string,     // 可选
+};
+
+// 设置默认值（可选）
+UserProfile.defaultProps = {
+  name: '匿名用户',
+  age: 0,
+  isActive: false,
+};
+```
+
+-  必填验证
+```js
+function RequiredExample({ username, password, email }) {
+  return <div>{username} - {email}</div>;
+}
+
+RequiredExample.propTypes = {
+  username: PropTypes.string.isRequired,  // 必填
+  password: PropTypes.string.isRequired,  // 必填
+  email: PropTypes.string,                 // 可选
+};
+
+// 使用
+<RequiredExample username="john" password="123456" />  // ✅ 正确
+<RequiredExample password="123456" />                   // ❌ 警告（缺少 username）
+```
+
+- 数组和对象验证
+```js
+function DataDisplay({ items, user, settings }) {
+  return (
+    <div>
+      {items.map(item => <li key={item}>{item}</li>)}
+      <p>用户: {user.name}</p>
+    </div>
+  );
+}
+
+DataDisplay.propTypes = {
+  // 数组
+  items: PropTypes.array,                    // 任意数组
+  tags: PropTypes.arrayOf(PropTypes.string), // 字符串数组
+  numbers: PropTypes.arrayOf(PropTypes.number), // 数字数组
+  
+  // 对象
+  user: PropTypes.object,                    // 任意对象
+  user: PropTypes.shape({                    // 特定形状的对象
+    name: PropTypes.string.isRequired,
+    age: PropTypes.number,
+    email: PropTypes.string
+  }),
+  
+  // 对象实例
+  date: PropTypes.instanceOf(Date),          // Date 实例
+  
+  // 对象值类型验证
+  settings: PropTypes.objectOf(PropTypes.number), // 对象的值都是数字
+};
+
+// 使用示例
+<DataDisplay 
+  items={['a', 'b', 'c']}
+  tags={['react', 'javascript']}
+  numbers={[1, 2, 3]}
+  user={{ name: '张三', age: 25 }}
+  date={new Date()}
+  settings={{ width: 100, height: 200 }}
+/>
+```
+
+-  函数和元素验证
+```js
+function InteractiveComponent({ onClick, renderHeader, children, icon }) {
+  return (
+    <div>
+      {renderHeader()}
+      <button onClick={onClick}>{children}</button>
+      {icon}
+    </div>
+  );
+}
+
+InteractiveComponent.propTypes = {
+  onClick: PropTypes.func,                    // 函数
+  renderHeader: PropTypes.func,               // 函数
+  children: PropTypes.node,                   // 可渲染的节点（任何可渲染内容）
+  icon: PropTypes.element,                    // React 元素（必须是一个元素）
+  
+  // 更多类型
+  elementType: PropTypes.elementType,         // React 组件类型
+  message: PropTypes.node,                    // 字符串、数字、元素等
+};
+
+// 使用
+<InteractiveComponent 
+  onClick={() => console.log('clicked')}
+  renderHeader={() => <h1>Header</h1>}
+  icon={<span>🔔</span>}
+>
+  Click me
+</InteractiveComponent>
+```
+
+>注意： 现在的 React 项目更推荐使用 TypeScript 替代 PropTypes，因为 TypeScript 能在编译时发现问题，提供更好的开发体验。
 
 
 
