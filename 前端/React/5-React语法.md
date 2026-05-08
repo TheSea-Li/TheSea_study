@@ -642,12 +642,58 @@ componentWillUnmount()：组件卸载前执行
 
 - this.props（接收父组件数据。）
 
+# 5. 组件生命周期
+> 分三阶段：挂载，更新，卸载：React 会在这三个阶段自动执行对应的代码，这就是生命周期。
+**现代React（useEffect全覆盖 挂载 / 更新 / 卸载）**
+```jsx
+// 示例
+import { useState, useEffect } from 'react';
 
+export default function LifeCycle() {
+  const [num, setNum] = useState(0);
 
+  useEffect(() => {
+    // 1. 挂载（出生）：组件第一次渲染执行
+    console.log("组件挂载完成");
 
+    // 2. 更新（成长）：num 变化时执行
+    console.log("组件更新，num =", num);
 
+    // 3. 卸载（死亡）：组件移除时执行
+    return () => {
+      console.log("组件卸载，清理资源");
+    };
+  }, [num]); // 依赖项：控制更新时机
 
+  return (
+    <div>
+      <h2>数字：{num}</h2>
+      <button onClick={() => setNum(num + 1)}>更新组件</button>
+    </div>
+  );
+}
+// 挂载
+控制台输出：
+组件挂载完成
+组件更新，num = 0
 
+//更新
+控制台输出：
+组件卸载，清理资源
+组件挂载完成
+组件更新，num = 1
+
+//卸载
+控制台输出：
+组件卸载，清理资源
+```
+
+**旧版React生命周期（了解即可）**
+- 挂载：componentDidMount()
+- 更新：componentDidUpdate()
+- 卸载：componentWillUnmount()
+
+![生命周期核心用法](../Images/React_image8.png)
 
 
 
