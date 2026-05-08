@@ -260,6 +260,26 @@ function App() {
 //实际项目用法：一个文件一个组件
 ```
 
+# 6. 组件设计原则
+- 单一职责：每个组件应该只做一件事。
+- 保持组件简洁：组件代码不应该超过 200-300 行。
+- 合理使用 Props：不要传递过多的 props。
+- 避免深层嵌套：过深的组件嵌套会导致 props drilling 问题。
+
+```js
+// 问题：props 需要层层传递
+<App>
+  <Layout user={user}>
+    <Sidebar user={user}>
+      <Menu user={user}>
+        <MenuItem user={user} />
+      </Menu>
+    </Sidebar>
+  </Layout>
+</App>
+// 解决：使用 Context 或状态管理
+```
+
 
 
 
