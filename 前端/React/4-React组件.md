@@ -83,10 +83,10 @@ root.render(
 
 > ***注意，原生 HTML 元素名以小写字母开头，而自定义的 React 类名以大写字母开头，比如 HelloMessage 不能写成 helloMessage。除此之外还需要注意组件类只能包含一个顶层标签，否则也会报错。***
 
-# 3.Props（属性）
+# 3. Props（属性）
  >Props 是组件之间传递数据的方式，类似于函数的参数。
 
-- Props类型：Props 可以是任何 JavaScript 值
+## Props类型：Props 可以是任何 JavaScript 值
 ```js
 function Demo() {
   const user = { name: "Alice", age: 25 };
@@ -113,7 +113,7 @@ function Demo() {
 }
 ```
 
-- Props的不可变性：永远不要修改 props！
+## Props的不可变性：永远不要修改 props！
 ```js
 // 错误：修改 props
 function BadComponent(props) {
@@ -127,7 +127,7 @@ function GoodComponent({ name }) {
 }
 ```
 
-- Props的基础用法和解构
+## Props的基础用法和解构
 
 1. 基础用法
 ```js
@@ -170,6 +170,94 @@ function Button({ text = "Submit", variant = "primary", disabled = false }) {
     </button>
   );
 }
+```
+
+# 4. 组件命名规范
+## 命名规则
+```js
+// 正确：大写字母开头（PascalCase）
+function UserProfile() { }
+function BlogPost() { }
+function NavBar() { }
+// 错误：小写字母开头
+function userProfile() { } // React 会将其视为 HTML 标签
+```
+
+## 文件命名
+```js
+// 推荐的文件结构
+src/
+├── components/
+│   ├── Button.jsx          // 或 Button.js
+│   ├── UserCard.jsx
+│   ├── Navigation/
+│   │   ├── Navigation.jsx
+│   │   ├── NavItem.jsx
+│   │   └── index.js        // 导出 Navigation
+```
+
+# 5. 组件的导出与导入
+```js
+// **导入**：默认导出可以任意命名，命名导出导入必须使用相同名字
+import MyButton from './Button';        // 名字随意
+import CustomButton from './Button';    // 也可以
+import Button from './Button';           // 最常见
+
+// **导出**：默认导出，命名导出，混合使用（常见于组件库）
+// 1. 默认导出：每个文件只能有一个默认导出，格式用export default
+// 方式1：先定义后导出
+function Button({ children, onClick }) {
+  return <button onClick={onClick}>{children}</button>;
+}
+export default Button;
+// 方式2：直接导出
+export default function Button({ children, onClick }) {
+  return <button onClick={onClick}>{children}</button>;
+}
+// 方式3：匿名函数
+export default ({ children, onClick }) => (
+  <button onClick={onClick}>{children}</button>
+);
+
+//2. 命名导出：格式用export const/function
+export const add = (a, b) => a + b;
+export const subtract = (a, b) => a - b;
+export function multiply(a, b) {
+  return a * b;
+}
+export const PI = 3.14159;
+
+//3. 混合使用
+// 默认导出主组件
+export default function Button({ children }) {
+  return <button>{children}</button>;
+}
+
+// 命名导出辅助组件和工具函数
+export const SmallButton = ({ children }) => (
+  <button style={{ fontSize: '12px' }}>{children}</button>
+);
+export const LargeButton = ({ children }) => (
+  <button style={{ fontSize: '24px' }}>{children}</button>
+);
+export const buttonUtils = {
+  variant: 'primary'
+};
+
+// 混合导入
+import Button, { SmallButton, LargeButton, buttonUtils } from './components';
+
+function App() {
+  return (
+    <div>
+      <Button>默认按钮</Button>
+      <SmallButton>小按钮</SmallButton>
+      <LargeButton>大按钮</LargeButton>
+    </div>
+  );
+}
+
+//实际项目用法：一个文件一个组件
 ```
 
 
