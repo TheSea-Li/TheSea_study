@@ -369,9 +369,9 @@ function ShoppingCart({ cart, user, loading, error }) {
 >> 避免重复渲染，提升列表性能；
 >> 防止列表状态错乱（比如复选框、输入框的状态错位）。
 >>3. key的使用规则：
->> 1. 唯一：在当前列表中，key 值不能重复；
->> 2. 稳定：key 值不会随数据排序、增删而改变；
->> 3. 优先使用后端返回的唯一 ID（如数据的 id 字段）。
+>> - 唯一：在当前列表中，key 值不能重复；
+>> - 稳定：key 值不会随数据排序、增删而改变；
+>> - 优先使用后端返回的唯一 ID（如数据的 id 字段）。
 
 **代码示例**
 ```jsx
@@ -774,13 +774,140 @@ useEffect(() => {
 }, []);
 ```
 
+# 7. React 表单与事件
+** 事件
+> 用户在页面上的操作：点击按钮、输入文字、提交表单、鼠标移动等。
+1. React 事件和原生 JS 事件几乎一样，只有两个小区别：
+- 命名用驼峰式
+- 事件处理是函数：直接写函数名 / 函数，不是字符串
+2. 常用3个事件：onClick（点击元素时），onChange（输入框内容改变时），onSubmit（表单提交时）
+3. 事件的2种写法
+- 第一种
+```jsx
+<button onClick={() => console.log('点击了')}>点我</button>
+```
 
+- 第二种（推荐）
+```jsx
+import { useState } from 'react';
 
+export default function TestEvent() {
+  const clickHandler = () => {
+    alert('按钮被点击了！');
+  };
 
+  return (
+    <div>
+      {/* 直接传入函数名 */}
+      <button onClick={clickHandler}>点击按钮</button>
+    </div>
+  );
+}
+```
 
+4. 事件对象e
+> 所有事件都会自动传入事件对象e
+- e.target：获取触发事件元素
+- e.preventDefault()：阻止默认行为（如表单提交刷新页面）
+```jsx
+const changeHandler = (e) => {
+  // 获取输入框的值
+  console.log(e.target.value);
+};
+```
 
+** 表单
+1. 核心概念：受控组件（React 表单唯一推荐写法）
+> 表单元素的 value 由 React 的 useState 管理，实现双向绑定
+>> 1. 输入框内容变 → state 自动更新
+>> 2. state 变 → 输入框内容自动刷新
+2. 实例：一个完整的表单组件，包含：输入框、密码框、复选框、表单提交
+```jsx
+import { useState } from 'react';
 
+export default function ReactForm() {
+  // 1. 用 useState 管理表单所有数据（双向绑定核心）
+  const [form, setForm] = useState({
+    username: '',   // 用户名
+    password: '',   // 密码
+    agree: false    // 是否同意协议
+  });
 
+  // 2. 通用输入框 change 事件（所有输入框共用）
+  const changeHandler = (e) => {
+    // 获取输入框的 name 和 value
+    const { name, value, type, checked } = e.target;
+    
+    setForm({
+      ...form, // 保留原有数据
+      // 复选框用 checked，普通输入框用 value
+      [name]: type === 'checkbox' ? checked : value
+    });
+  };
+
+  // 3. 表单提交事件
+  const submitHandler = (e) => {
+    // 阻止表单默认刷新页面！！！（必须写）
+    e.preventDefault();
+    // 在这里提交数据到后端（AJAX）
+    console.log('表单提交：', form);
+    alert('提交成功！用户名：' + form.username);
+  };
+
+  return (
+    {/* 4. 表单绑定 onSubmit 事件 */}
+    <form onSubmit={submitHandler} style={{ padding: '20px' }}>
+      <div>
+        <label>用户名：</label>
+        {/* 输入框：value 绑定 state + onChange 更新 */}
+        <input
+          type="text"
+          name="username"
+          value={form.username}
+          onChange={changeHandler}
+          placeholder="请输入用户名"
+        />
+      </div>
+
+      <div style={{ margin: '10px 0' }}>
+        <label>密码：</label>
+        <input
+          type="password"
+          name="password"
+          value={form.password}
+          onChange={changeHandler}
+          placeholder="请输入密码"
+        />
+      </div>
+
+      <div>
+        <input
+          type="checkbox"
+          name="agree"
+          checked={form.agree}
+          onChange={changeHandler}
+        />
+        <label>同意用户协议</label>
+      </div>
+
+      {/* 提交按钮 */}
+      <button 
+        type="submit" 
+        style={{ marginTop: '10px' }}
+        disabled={!form.agree} // 未同意则禁用按钮
+      >
+        提交表单
+      </button>
+    </form>
+  );
+}
+```
+
+3. 表单核心规则
+- 所有表单数据用 useState 管理（受控组件）
+- 输入框必须绑定 value + onChange
+- 表单提交必须写 e.preventDefault()（阻止页面刷新）
+- 多个输入框可以用一个 change 函数处理（通过 name 属性区分）
 
 
 
