@@ -909,5 +909,106 @@ export default function ReactForm() {
 - 表单提交必须写 e.preventDefault()（阻止页面刷新）
 - 多个输入框可以用一个 change 函数处理（通过 name 属性区分）
 
+# 8. React Refs
+1. 什么是Refs?
+>Refs 是 React 提供的「直接获取 / 操作原生 DOM 元素」的方式。React 理念是数据驱动视图，正常我们不直接操作 DOM，靠 useState 改数据自动更新页面；但有些场景必须手动操作原生 DOM，就用 Refs。
+
+2. 什么时候用Refs?
+- 输入框自动聚焦、失焦
+- 获取 DOM 原生属性：宽高、偏移量、滚动位置
+- 控制 DOM 播放 / 暂停视频、音频
+- 存一个更新不触发页面重渲染的变量
+
+3. 函数组件怎么用Ref?
+> 用Hook：useRef
+```jsx
+// 示例
+import { useRef, useEffect } from 'react';
+
+export default function RefDemo() {
+  // 1. 创建 ref，初始值 null
+  const inputRef = useRef(null);
+
+  // 挂载后自动聚焦
+  useEffect(() => {
+    // 3. 通过 .current 拿到真实 DOM
+    inputRef.current.focus();
+  }, []);
+
+  return (
+    <div>
+      {/* 2. 绑定到 DOM 元素 */}
+      <input ref={inputRef} placeholder="页面加载自动聚焦" />
+    </div>
+  );
+}
+```
+
+4. useRef两个核心作用
+1. 作用 1：获取 / 操作 DOM（Ref 本职）
+```jsx
+// 取值
+console.log(inputRef.current.value);
+// 聚焦
+inputRef.current.focus();
+// 清空
+inputRef.current.value = '';
+```
+2. 作用 2：存普通变量，修改不触发重渲染（适合存：定时器、DOM、不需要渲染的临时变量。）
+```jsx
+import { useRef, useState } from 'react';
+
+export default function RefVar() {
+  const [count, setCount] = useState(0);
+  // 用 ref 存变量
+  const timerRef = useRef(null);
+
+  const start = () => {
+    timerRef.current = setInterval(() => {
+      setCount(prev => prev + 1);
+    }, 1000);
+  };
+
+  const stop = () => {
+    // 取出 ref 里存的定时器
+    clearInterval(timerRef.current);
+  };
+
+  return (
+    <div>
+      <p>{count}</p>
+      <button onClick={start}>开始</button>
+      <button onClick={stop}>停止</button>
+    </div>
+  );
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
