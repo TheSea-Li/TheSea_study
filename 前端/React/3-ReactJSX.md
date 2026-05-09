@@ -1,144 +1,127 @@
-# 1.JSX语法规则
-- 必须闭合标签
-- class->className：因为class是js关键字，故用className替代
-- for->htmlFor
-- 大写开头组件
-```js
-# 正确写法
-<Card /> 
+# 1. 什么是JSX？
+JSX = JavaScript + XML，是 JavaScript 的语法扩展，专门用来在 React 中写 UI 结构。
 
-# 错误写法
-<card />
+# 2. JSX语法规则
+### 1. 必须有唯一根节点
+一个组件的 JSX 只能有一个顶层标签，不能并列多个根元素。
+```jsx
+// 正确写法
+export default function Demo() {
+  return (
+    <> {/* 根节点：空Fragment */}
+      <h1>标题</h1>
+      <p>内容</p>
+    </>
+  );
+}
 ```
-
-- 注释写法：{/* 注释内容 */}
->注意：根元素内部才使用这种注释写法，外部采用/* 注释内容 */。
-
-- 根元素：return只能有一个根节点
-```js
+```jsx
+// 错误写法
 return (
-  <>  {/* 碎片 Fragment，空标签，不渲染 DOM */}
-    <h1>标题</h1>
-    <p>段落</p>
-  </>
+  <h1>标题</h1>
+  <p>内容</p>
 );
 ```
 
-# 2.表达式嵌入，条件渲染，列表渲染
->JSX 最强大的地方是可以用 {} 嵌入 JavaScript 表达式（只能是表达式，不能是语句如 if/for）。
+### 2. 用 className 代替 class
+因为 class 是 JS 关键字，所以 JSX 必须用 className 定义样式类
+```jsx
+<div className="box">样式</div>
+```
 
-- **表达式嵌入**：任何有效的 JS 表达式都可以放进 {}
-```js
-const name = 'runoob';
-const now = new Date().toLocaleString();
+### 3. 用 htmlFor 代替 for
+标签的 for 属性改成 htmlFor
+```jsx
+<label htmlFor="username">用户名</label>
+<input id="username" />
+```
+
+### 4. 所有标签必须闭合
+```jsx
+<img src="logo.png" />
+<input type="text" />
+<br />
+```
+
+### 5. JS 中嵌入表达式用 { }
+在 JSX 中写变量、运算、函数、字符串、JS 逻辑，必须包在大括号里：
+```jsx
+const name = "张三";
+const num = 10;
 
 return (
   <div>
-    <h1>你好，{name}！</h1>
-    <p>当前时间：{now}</p>
-    <p>计算结果：{2 + 3 * 5}</p>  {/* 17 */}
+    {/* 变量 */}
+    <p>{name}</p>
+    {/* 运算 */}
+    <p>{num + 5}</p>
+    {/* 字符串 */}
+    <p>{"你好世界"}</p>
   </div>
 );
 ```
 
-- **条件渲染**：用三元运算符或 &&，不要用 if 语句直接在 JSX 中（可以用在函数体里）
-```js
-const isLoggedIn = true;
-const count = 0;
+
+### 6. 行内样式用 双重大括号 {{ }}
+第一个 {} 表示写 JS，第二个 {} 表示样式对象：
+```jsx
+<div style={{ color: "red", fontSize: "20px" }}>行内样式</div>
+```
+
+### 7.  事件名驼峰命名
+onClick、onChange、onSubmit，不能小写
+```jsx
+<button onClick={() => alert("点击")}>按钮</button>
+```
+
+
+### 8.  注释写法：{/* 注释内容 */}
+JSX 里不能用 //，必须用大括号包起来
+```jsx
+<div>
+  {/* 这是 JSX 注释 */}
+  <p>内容</p>
+</div>
+```
+
+### 9.  条件渲染（不能用 if/else）
+JSX 不支持直接写 if/else，用 三元运算符 或 逻辑与 &&
+```jsx
+const isLogin = true;
 
 return (
   <div>
-    {isLoggedIn ? <h1>欢迎回来，{name}！</h1> : <h1>请登录</h1>}
+    {/* 三元运算 */}
+    {isLogin ? <p>欢迎回来</p> : <p>请登录</p>}
     
-    {count > 0 && <p>你有 {count} 条未读消息</p>}  {/* count 为 0 时不渲染 */}
+    {/* 逻辑与 && */}
+    {isLogin && <button>退出登录</button>}
   </div>
 );
 ```
 
-- **列表渲染**：用 map() 渲染数组，必须给每个元素加 key 属性（唯一标识，帮助 React 高效更新 DOM）。
-```js
-const items = [
-  { id: 1, name: '苹果' },
-  { id: 2, name: '香蕉' },
-  { id: 3, name: '橙子' },
-];
+### 10.  列表渲染：map + key
+```jsx
+const data = [{id:1,name:"张三"},{id:2,name:"李四"}]
 
 return (
   <ul>
-    {items.map(item => (
-      <li key={item.id}>  {/* key 必须唯一且稳定！ */}
-        {item.name}
-      </li>
+    {data.map(item => (
+      <li key={item.id}>{item.name}</li>
     ))}
   </ul>
 );
 ```
->key的重要性
->>- 没有 key：React 会警告，可能导致渲染错误（尤其是列表动态变化时）。
->>- 坏习惯：用 index 作为 key（key={index}）——当列表顺序变化时，会导致不必要的重渲染或状态丢失。
->>- 最佳实践：用数据中的唯一 ID（如数据库 id）。
 
-#3. 样式
-- 内联样式
-```js
-return (
-  <div
-    style={{
-      backgroundColor: '#f0f0f0',
-      padding: '20px',
-      borderRadius: '8px',
-      textAlign: 'center',
-      fontFamily: 'Arial, sans-serif',
-    }}
-  >
-    <h2 style={{ color: 'blue', marginBottom: '10px' }}>
-      内联样式示例
-    </h2>
-  </div>
-);
-```
->注意：内联样式是用{{}}包裹起来
+# 3. JSX本质
+JSX 只是 React.createElement 的语法糖，浏览器最终执行的是普通 JS
+```jsx
+// 你写的 JSX
+<div className="box">Hello</div>
 
-- CSS Modules：Vite 默认支持 CSS Modules，避免全局污染。
-```js
-/* Card.module.css */
-.card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  padding: 20px;
-  margin: 20px;
-}
-
-.title {
-  color: #333;
-  margin: 0 0 10px 0;
-}
-
-.content {
-  color: #666;
-}
-```
-在组件中导入并使用
-```js
-import styles from './styles/Card.module.css';
-
-return (
-  <div className={styles.card}>
-    <h3 className={styles.title}>标题</h3>
-    <p className={styles.content}>内容</p>
-  </div>
-);
+// 编译后（React 自动处理）
+React.createElement("div", { className: "box" }, "Hello");
 ```
 
-- 数组：JSX 允许在模板中插入数组，数组会自动展开所有成员
-```js
-var arr = [
-  <h1>菜鸟教程</h1>,
-  <h2>学的不仅是技术，更是梦想！</h2>,
-];
-const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(
-  <div>{arr}</div>
-);
-```
+
+
