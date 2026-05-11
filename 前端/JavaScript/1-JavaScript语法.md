@@ -128,8 +128,8 @@ clearInterval(t2);
 >setTimeout：可清除可不清除看情景。只执行一次，但关键是在它执行之前可能需要取消，如果不保存 ID，就无法提前中止。
 >setInterval ：必须手动清除，否则它会无限循环执行，很容易导致页面卡顿或内存泄漏。
 
-# 五. 数组高阶方法
-> 放弃传统 for 循环，精通所有数组高阶方法，工作开发、逻辑处理全靠这些。
+# 六. 数组高阶方法
+放弃传统 for 循环，精通所有数组高阶方法，工作开发、逻辑处理全靠这些。
 ## 1. forEach 遍历
 > 作用：纯粹遍历数组，无返回值，只做循环执行
 > 特点：不返回新数组，不能中断遍历
@@ -257,18 +257,285 @@ arr.sort((a,b) => a - b);
 arr.sort((a,b) => b - a);
 ```
 
+# 七. let /const 块级作用域
+> var 有变量提升、无块级作用域、可重复声明、容易污染全局。现在规范优先 const（常量，不修改），会变的变量用 let，永远不用 var。
+### 1. 块级作用域
+{ } 内部声明的 let/const，外面访问不到
+```js
+{
+  let a = 10;
+}
+console.log(a); // 报错
+```
 
+### 2. 不能重复声明
+```js
+let num = 10;
+let num = 20; // 报错
+```
 
+### 3. 暂时性死区
+块内先使用再声明，直接报错，不会像 var 那样 undefined。
 
+### 4. 使用规则
+- 不变的值、对象、数组 → const
+- 后续要重新赋值的普通变量 → let
 
+# 八. 解构赋值
+快速从数组、对象中快速取出值。
+### 1. 数组结构
+```js
+let arr = [10, 20, 30];
+// 解构
+let [a, b, c] = arr;
+console.log(a, b, c); // 10 20 30
 
+// 跳过某一项
+let [x, , z] = arr;
 
+// 设置默认值
+let [m = 1, n = 2] = [10];
+```
 
+### 2. 对象结构
+```js
+let obj = { name: "小明", age: 18 };
 
+// 按属性名解构
+let { name, age } = obj;
 
+// 重命名 + 默认值
+let { name: username, age = 20 } = obj;
+```
 
+# 九. 模板字符串 
+代替双引号、单引号，支持换行、直接嵌入变量。
+```js
+let name = "小明";
+let age = 18;
 
+// 嵌入变量/表达式
+let str = `我的名字是${name}，今年${age}岁`;
 
+// 支持直接换行，不用拼接
+let html = `
+  <div>
+    <p>文字</p>
+  </div>
+`;
+```
+
+# 十. 箭头函数
+**简写规则**
+- 省略 function
+- 只有一个参数可省略括号
+- 单行返回可省略 {} 和 return
+```js
+// 普通函数
+function fn1(n) {
+  return n * 2;
+}
+
+// 箭头函数完整版
+let fn2 = (n) => {
+  return n * 2;
+};
+
+// 极简写法
+let fn3 = n => n * 2;
+```
+> 没有自己的 this，继承外层作用域的 this
+> 不能作为构造函数（不能 new）
+> 没有 arguments
+
+# 十一. 扩展运算符 ... / 剩余运算符 ...
+### 1. 拓展运算符
+> 拆分数组 / 对象
+```js
+// 数组合并、拷贝
+let arr1 = [1, 2];
+let arr2 = [...arr1, 3, 4]; 
+
+// 对象拷贝、合并
+let obj1 = { a: 1 };
+let obj2 = { ...obj1, b: 2 };
+```
+
+### 2. 剩余运算符
+> 把剩余参数收拢成数组
+```js
+// 函数剩余参数
+function sum(...args) {
+  console.log(args); // [10,20,30]
+}
+sum(10, 20, 30);
+
+// 解构剩余
+let [a, ...rest] = [1,2,3,4];
+// rest = [2,3,4]
+```
+
+# 十一. 对象简写 & 属性名表达式
+### 1. 对象属性简写
+变量名和属性名一致，可简写
+```js
+let name = "小明";
+let age = 18;
+
+// 简写
+let obj = { name, age };
+// 等价于 { name:name, age:age }
+```
+
+### 2.动态属性名
+用 [] 写动态变量当属性名
+```js
+let key = "username";
+let obj = {
+  [key]: "小明"
+};
+```
+
+# 十二. Set / Map 数据结构
+### Set 集合
+自动去重，值唯一
+```js
+// 数组去重
+let arr = [1,1,2,2,3];
+let s = new Set(arr);
+// 转回数组
+let newArr = [...s]; // [1,2,3]
+```
+
+###  Map 键值对
+ES6 新增的两种内置数据结构，专门弥补数组、普通对象的短板：
+### Set 集合
+**特点**
+- 成员自动去重，不允许重复值
+- 有序：按插入顺序保存
+- 可以存任意类型：数字、字符串、对象、数组等
+- 没有下标，不能通过索引取值
+
+**创建set**
+```js
+// 空Set
+const s1 = new Set();
+
+// 传入数组初始化，自动去重
+const s2 = new Set([1,2,2,3,3,4]);
+console.log(s2); // Set(4) {1,2,3,4}
+```
+
+**常用api**
+方法 / 属性	作用
+size	获取元素个数（类似数组 length）
+add()	添加元素
+delete()	删除指定元素
+has()	判断是否存在某元素，返回布尔
+clear()	清空所有元素
+```js
+const set = new Set();
+
+set.add(1);
+set.add(2);
+set.add(1); // 重复，无效添加
+
+console.log(set.size); // 2
+console.log(set.has(2)); // true
+
+set.delete(2);
+console.log(set); // Set(1) {1}
+
+set.clear();
+```
+
+**Set 经典用法：数组去重**
+```js
+const arr = [1,2,2,3,3,3];
+// Set去重 再转回数组
+const newArr = [...new Set(arr)];
+console.log(newArr); // [1,2,3]
+```
+
+**遍历 Set**
+```js
+const set = new Set([1,2,3]);
+
+// for...of
+for (let item of set) {
+  console.log(item);
+}
+
+// forEach
+set.forEach(item => console.log(item));
+```
+
+### Map 键值对
+**比较**
+1. 普通对象 {} 痛点：
+- 键只能是字符串 / Symbol
+- 遍历不方便、无序
+- 无法直接获取长度
+2. Map 优势：
+- 键可以是任意类型：数字、对象、数组、函数都行
+- 按插入顺序有序
+- 自带 size 直接获取键值对数量
+- 遍历友好，增删性能更好
+
+**创建Map**
+```js
+// 空Map
+const m1 = new Map();
+
+// 二维数组初始化
+const m2 = new Map([
+  ['name', '张三'],
+  [18, '年龄'],
+  [{id:1}, '对象当键']
+]);
+```
+
+**常用api**
+方法 / 属性	作用
+size	获取键值对数量
+set(key, val)	设置键值对
+get(key)	通过键取值
+has(key)	判断键是否存在
+delete(key)	删除指定键
+clear()	清空
+
+```js
+const map = new Map();
+
+// 任意类型当key
+let objKey = { id: 1 };
+map.set('name', '李四');
+map.set(100, '分数');
+map.set(objKey, '我是对象键的值');
+
+console.log(map.get('name')); // 李四
+console.log(map.get(objKey)); // 我是对象键的值
+console.log(map.has(100)); // true
+console.log(map.size); // 3
+```
+**遍历Map**
+```js
+const map = new Map([['name','张三'],['age',20]]);
+
+// 1. 遍历每一项 [key, value]
+for (let [k, v] of map) {
+  console.log(k, v);
+}
+
+// 2. 只遍历key
+for (let k of map.keys()) {}
+
+// 3. 只遍历value
+for (let v of map.values()) {}
+
+// 4. forEach
+map.forEach((v, k) => console.log(k, v));
+```
 
 
 
