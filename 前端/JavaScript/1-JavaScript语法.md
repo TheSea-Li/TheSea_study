@@ -762,11 +762,421 @@ fetch("https://xxx.com/api")
 .catch(err => console.log(err));
 ```
 
+# 十八. 三大作用域
+### 全局作用域
+- 全局直接定义的变量 / 函数，任何地方都能访问
+- 浏览器中全局变量会挂载到 window
+
+### 函数作用域
+- 在函数内部定义的变量
+- 只能在函数内部访问，外部无法访问
+
+### 块级作用域
+- let / const 声明，在 { }（if、for、while、代码块）内生效
+- 块外无法访问，var 没有块级作用域
+
+# 十九. 作用域链
+当当前作用域找不到变量时，会一层一层往外层作用域查找，直到全局作用域。全局还找不到 → 报错 is not defined。
+查找顺序：就近查找，层层向外
+**当前函数 → 外层函数 → 全局作用域**
+```js
+let num = 100;
+function fn1() {
+  let num = 50;
+  function fn2() {
+    console.log(num); // 50  就近原则
+  }
+  fn2();
+}
+fn1();
+```
+
+# 二十. 变量提升 & 函数提升
+### 变量提升（只针对 var）
+var 声明的变量，会提升到当前作用域顶部，值为 undefined
+```js
+console.log(a); // undefined
+var a = 10;
+```
+
+### let /const 无提升
+有暂时性死区：块级作用域内，先使用后声明直接报错。
+
+### 函数提升
+函数声明会整体提升，比变量提升优先级更高
+```js
+fn(); // 可以正常调用
+function fn() {
+  console.log("函数提升");
+}
+```
+函数表达式不会提升
+```js
+fn(); // 报错
+var fn = function(){}
+```
+
+# 二十一. 闭包			
+### 1. 闭包形成条件
+- 函数嵌套函数
+- 内层函数访问外层函数的变量
+- 内层函数被外部引用
+
+### 2. 闭包核心特点
+外层函数执行完毕，内部变量不会被销毁，一直保留在内存。
+```js
+function outer() {
+  let count = 0;
+  // 内层函数
+  return function inner() {
+    count++;
+    console.log(count);
+  };
+}
+
+let res = outer();
+res(); // 1
+res(); // 2
+res(); // 3
+```
+
+### 3. 闭包用途
+- 私有化变量
+- 延长变量生命周期
+- 防抖、节流、封装底层原理全靠闭包
+
+### 4. 缺点
+容易造成内存泄漏，不用时要手动置空。
 
 
+# 二十二. this 指向	
+this 不是定义时决定，是调用时决定
+### 1. 普通函数独立调用
+this → 指向 window（浏览器）
+```js
+function fn() {
+  console.log(this); // window
+}
+fn();
+```
 
+### 2. 对象方法调用
+this → 指向当前调用的对象
+```js
+let obj = {
+  say() {
+    console.log(this); // obj 对象
+  }
+};
+obj.say();
+```
 
+### 3. 构造函数 new 调用
+this → 指向new 出来的实例对象
+```js
+function Person() {
+  this.name = "张三";
+}
+let p = new Person();
+```
 
+### 4. 箭头函数
+没有自己的 this，继承外层作用域的 this，永远不产生新的 this。
+
+# 二十三. call /apply/bind 改变 this 指向
+三个方法都能强行改变函数内部 this 的指向；区别只在于执行时机、传参方式不一样。
+### 1.call
+**语法**
+```js
+函数.call(新的this对象, 参数1, 参数2, ...)
+```
+**特点**
+- 立即执行函数
+- 参数一个个依次传入
+
+**示例**
+```js
+// 普通函数
+function fn(a, b) {
+  console.log(this.name, a, b);
+}
+
+const obj = { name: "张三" };
+
+// 把 fn 里的 this 改成 obj，立即执行
+fn.call(obj, 10, 20); 
+// 输出：张三 10 20
+```
+
+### 2.apply
+**语法**
+```js
+函数.apply(新的this对象, [参数数组])
+```
+**特点**
+- 立即执行函数
+- 参数必须放在数组 / 伪数组里传
+
+**示例**
+```js
+function fn(a, b) {
+  console.log(this.name, a, b);
+}
+
+const obj = { name: "李四" };
+
+// 参数包在数组里
+fn.apply(obj, [100, 200]);
+// 输出：李四 100 200
+```
+**经典示例**
+```js
+const arr = [12, 5, 88, 32];
+// Math.max 不能直接传数组，用 apply 拆解
+const max = Math.max.apply(null, arr);
+const min = Math.min.apply(null, arr);
+console.log(max, min); // 88 5
+```
+
+### 3.bind
+**语法**
+```js
+const 新函数 = 函数.bind(新的this对象, 参数1, 参数2...)
+```
+**特点**
+- 不会立即执行，返回一个绑定好 this 的新函数
+- 后续需要手动调用
+- 可以预先固定部分参数
+
+**示例**
+```js
+function fn(a, b) {
+  console.log(this.name, a, b);
+}
+
+const obj = { name: "王五" };
+
+// 绑定this，返回新函数，不执行
+const newFn = fn.bind(obj, 66);
+
+// 手动调用
+newFn(88); 
+// 输出：王五 66 88
+```
+**经典实例**
+```js
+const obj = {
+  name: "小明",
+  say() {
+    setTimeout(function() {
+      console.log(this.name); 
+    }.bind(this), 1000); // 强行绑定this为obj
+  }
+};
+obj.say(); // 小明
+```
+
+# 二十四. 构造函数 + 原型 + 原型链
+### 1. 构造函数
+构造函数就是用来批量创建对象的模板函数。
+**约定**：
+- 首字母大写
+- 必须用 new 调用
+- 内部 this 指向将来 new 出来的实例对象
+
+**基础写法**
+```js
+// 构造函数（模板）
+function Person(name, age) {
+  // 实例自身属性
+  this.name = name;
+  this.age = age;
+
+  // 实例自身方法
+  this.say = function() {
+    console.log(this.name + "会说话");
+  };
+}
+
+// new 创建实例
+const p1 = new Person("张三", 18);
+const p2 = new Person("李四", 20);
+
+console.log(p1.name); // 张三
+p1.say();
+```
+
+**钩爪函数缺点**
+p1、p2 各自拥有一份独立的 say 方法，每个实例都复制一份，浪费内存。
+
+**new 到底做了什么**
+1. 创建一个空新对象
+2. 把这个空对象的 __proto__ 指向构造函数的 prototype
+3. 把构造函数内部的 this 绑定为这个新对象
+4. 执行构造函数代码，最后默认返回这个新对象
+
+### 2. 原型 prototype
+**两个核心概念**
+- 显式原型：函数身上的 prototype 属性（只有函数有）
+> Person.prototype
+> 是一个对象，叫原型对象，用来存放所有实例共享的方法 / 属性
+- 隐式原型：实例对象身上的 __proto__ 属性
+> p1.__proto__
+> 所有实例的 __proto__ 都指向构造函数的 prototype
+
+**核心等式**
+```js
+// 实例的隐式原型 === 构造函数的显式原型
+p1.__proto__ === Person.prototype
+
+// 原型对象上有 constructor 指回构造函数
+Person.prototype.constructor === Person
+```
+
+**把方法放到原型上（解决内存浪费）**
+```js
+function Person(name, age) {
+  this.name = name;
+  this.age = age;
+}
+
+// 公共方法挂到原型上，所有实例共享
+Person.prototype.say = function() {
+  console.log(this.name + "会说话");
+};
+
+const p1 = new Person("张三", 18);
+const p2 = new Person("李四", 20);
+
+p1.say();
+p2.say();
+```
+
+**作用**
+- 存放所有实例共享的方法 / 属性
+- 实例自身没有的属性 / 方法，会去原型上找
+
+### 3. 原型链
+**是什么**
+当访问一个对象的属性 / 方法时：
+1. 先在对象自身找
+2. 找不到就去 __proto__ 指向的原型对象找
+3. 还找不到，就顺着原型对象的 __proto__ 一直往上找
+4. 直到找到 Object.prototype
+5. Object.prototype.__proto__ 是 null，查找终止
+这条一层一层向上查找的链式关系，就是原型链。
+
+**完整原型链走向**
+```js
+实例p1 
+→ p1.__proto__ 
+→ Person.prototype 
+→ Person.prototype.__proto__ 
+→ Object.prototype 
+→ Object.prototype.__proto__ 
+→ null
+```
+** 代码演示原型链查找**
+```js
+function Person(name) {
+  this.name = name;
+}
+
+// 原型上加属性
+Person.prototype.age = 18;
+
+const p1 = new Person("张三");
+
+console.log(p1.name); // 自身有 → 张三
+console.log(p1.age);  // 自身没有 → 去原型找 → 18
+
+// 连 toString 都来自顶层 Object 原型
+console.log(p1.toString());
+js
+
+```
+
+# 二十五. 浅拷贝 & 深拷贝
+**前提**
+只针对引用类型：Object、Array。基本类型（数字 / 字符串 / 布尔等）本身就是值拷贝，不存在浅 / 深拷贝。
+
+**区别**
+- **浅拷贝**：只拷贝表层地址，嵌套层共用同一份堆数据
+- **深拷贝**：拷贝所有层级，全新堆内存，完全互不影响
+
+### 浅拷贝
+只复制对象第一层属性，如果有嵌套对象 / 数组，内层依旧共用同一个内存地址，改内层会互相影响。
+**常见浅拷贝方式
+1. 对象：Object.assign()、扩展运算符 ...
+2. 数组：[...arr]、arr.slice()、arr.concat()
+**单层对象：浅拷贝没问题**
+```js
+let obj1 = { name: '张三', age: 18 };
+// 浅拷贝
+let obj2 = { ...obj1 };
+
+obj2.name = '李四';
+console.log(obj1.name); // 张三  互不影响
+```
+
+**嵌套对象：浅拷贝有坑**
+```js
+let obj1 = {
+  name: '张三',
+  info: { height: 180 } // 嵌套引用类型
+};
+
+// 浅拷贝
+let obj2 = { ...obj1 };
+
+// 修改嵌套里的属性
+obj2.info.height = 190;
+
+console.log(obj1.info.height); // 190
+```
+> 浅拷贝只拷第一层，info 依旧指向同一个堆内存地址，改一个全变。
+
+### 深拷贝
+把对象每一层、嵌套所有层级都完整复制一份，开辟全新堆内存。新旧对象完全独立，修改任意层级，互不影响。
+**最简单 —— JSON 暴力深拷贝**
+```js
+let obj1 = {
+  name: '张三',
+  info: { height: 180 }
+};
+
+// 深拷贝
+let obj2 = JSON.parse(JSON.stringify(obj1));
+
+obj2.info.height = 190;
+console.log(obj1.info.height); // 180  不受影响
+```
+**缺点**
+1. 不能拷贝 函数、正则、Symbol、undefined，会直接丢失
+2. 日期对象 会变成字符串
+3. 不支持 循环引用（对象自己嵌套自己）会报错
+
+**手写递归深拷贝（面试常考）**
+```js
+function deepClone(obj) {
+  // 终止条件：不是对象/数组 就直接返回
+  if (typeof obj !== 'object' || obj === null) {
+    return obj;
+  }
+
+  // 判断是数组还是对象
+  let newObj = Array.isArray(obj) ? [] : {};
+
+  // 遍历每一个键
+  for (let key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      // 递归拷贝每一层
+      newObj[key] = deepClone(obj[key]);
+    }
+  }
+  return newObj;
+}
+```
 
 
 
