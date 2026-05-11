@@ -128,17 +128,134 @@ clearInterval(t2);
 >setTimeout：可清除可不清除看情景。只执行一次，但关键是在它执行之前可能需要取消，如果不保存 ID，就无法提前中止。
 >setInterval ：必须手动清除，否则它会无限循环执行，很容易导致页面卡顿或内存泄漏。
 
+# 五. 数组高阶方法
+> 放弃传统 for 循环，精通所有数组高阶方法，工作开发、逻辑处理全靠这些。
+## 1. forEach 遍历
+> 作用：纯粹遍历数组，无返回值，只做循环执行
+> 特点：不返回新数组，不能中断遍历
+```js
+let arr = [1,2,3];
+arr.forEach((item, index, arr) => {
+  // item：当前每一项
+  // index：下标
+  // arr：原数组
+  console.log(item, index);
+});
+```
 
+## 2. map 映射（常用）
+> 作用：遍历每一项，加工处理，返回一个新数组
+> 特点：返回数组长度 和 原数组一致；不改变原数组
+```js
+let arr = [1,2,3];
+// 每一项都乘2，返回新数组
+let newArr = arr.map(item => item * 2);
+console.log(newArr); // [2,4,6]
+```
 
+## 3. filter 过滤筛选
+> 作用：按条件筛选，返回符合条件的新数组
+> 特点：不改变原数组；只保留条件为 true 的项
+```js
+let arr = [10,20,30,40];
+// 筛选大于20的数
+let res = arr.filter(item => item > 20);
+console.log(res); // [30,40]
+```
 
+## 4. find/findIndex
+### find
+> 作用：找到第一个符合条件的元素，找不到返回 undefined
+```js
+let arr = [10,20,30];
+let item = arr.find(item => item === 20);
+console.log(item); // 20
+```
 
+### findIndex
+> 作用：找到第一个符合条件元素的下标，找不到返回 -1
+```js
+let index = arr.findIndex(item => item === 20);
+console.log(index); // 1
+```
 
+## 5. some/every 判断
+### some
+> 作用：只要有一项满足条件，直接返回 true；全都不满足才 false
+```js
+let arr = [10,20,30];
+let flag = arr.some(item => item > 25);
+console.log(flag); // true
+```
 
+### every
+> 作用：所有项都满足条件 才返回 true，有一个不满足就 false
+```js
+let flag = arr.every(item => item > 5);
+console.log(flag); // true
+```
 
+## 6. reduce 汇聚（重点+难点）
+> 作用：数组累加、求和、去重、数组转对象，万能汇聚方法
+### 求和
+```js
+let arr = [1,2,3,4];
+// sum：累加器，item：当前项
+let total = arr.reduce((sum, item) => {
+  return sum + item;
+}, 0); // 初始值0
+console.log(total); // 10
+```
 
+## 7. slice /splice
+### slice 截取
+> 作用：截取数组一部分，返回新数组，不改变原数组
+```js
+let arr = [1,2,3,4,5];
+let res = arr.slice(1,3); // slice(开始下标, 结束下标) 包头不包尾
+console.log(res); // [2,3]
+```
 
+### splice 删除/插入/替换
+> 作用：删除、新增、替换数组元素，直接改变原数组
+```js
+let arr = [1,2,3,4];
+// 从下标1开始，删除2个
+arr.splice(1,2);
+console.log(arr); // [1,4]
+```
 
+## 8. includes /indexOf 判断是否包含
+### includes
+> 作用：判断数组是否包含某一项，返回布尔值 true/false
+```js
+let arr = [10,20,30];
+console.log(arr.includes(20)); // true
+```
 
+### indexOf
+> 作用：找到元素下标，找到返回下标，找不到返回 -1
+```js
+console.log(arr.indexOf(20)); // 1
+console.log(arr.indexOf(99)); // -1
+```
+
+## 9. 其它常用
+### join 数组转字符串
+```js
+let arr = [1,2,3];
+let str = arr.join('-'); 
+console.log(str); // "1-2-3"
+```
+
+### sort 数组排序
+```js
+let arr = [3,1,2];
+// 数字升序
+arr.sort((a,b) => a - b);
+// 数字降序
+arr.sort((a,b) => b - a);
+```
 
 
 
