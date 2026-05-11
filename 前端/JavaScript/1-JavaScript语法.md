@@ -538,18 +538,229 @@ map.forEach((v, k) => console.log(k, v));
 ```
 
 
+# 十三. JS 单线程 与 同步 / 异步
+1. js特点
+JavaScript 是单线程：同一时间只能做一件事。
+2.同步
+从上到下，按顺序执行，上一行没完，下一行等着。
+```js
+console.log(1);
+console.log(2);
+console.log(3);
+// 输出 1 2 3 顺序固定
+```
+3.异步
+代码不会等待，先往后执行，后面事情做完了再回头执行。
+常见异步：
+- 定时器 setTimeout
+- 网络请求 / AJAX / Fetch
+- 事件绑定
 
+```js
+console.log(1);
 
+setTimeout(() => {
+  console.log(2);
+}, 0);
 
+console.log(3);
 
+// 输出顺序：1 → 3 → 2
+```
+>注意：定时器哪怕延时 0 毫秒，也是异步，会后执行。
 
+# 十四. 回调函数
+1. 什么是回调函数
+把一个函数当做参数，传给另一个函数，将来再执行。
+```js
+function fn(cb) {
+  console.log("执行任务");
+  // 回头调用传进来的函数
+  cb();
+}
 
+fn(() => {
+  console.log("回调执行");
+});
+```
 
+2. 回调地狱
+多个异步操作依赖先后顺序，会一层套一层，代码向右无限嵌套，难维护、难读。
+```js
+setTimeout(() => {
+  console.log("第一步");
+  setTimeout(() => {
+    console.log("第二步");
+    setTimeout(() => {
+      console.log("第三步");
+    }, 1000);
+  }, 1000);
+}, 1000);
+```
+> Promise 就是为了解决回调地狱而生。
 
+# 十五. Promise 核心
+1. Promise 三种状态
+- pending 进行中
+- fulfilled 成功
+- rejected 失败
+状态一旦改变，就不能再变。
 
+2. 基础语法
+```js
+const p = new Promise((resolve, reject) => {
+  // 异步任务
+  let flag = true;
 
+  if (flag) {
+    // 成功：触发 then
+    resolve("成功结果");
+  } else {
+    // 失败：触发 catch
+    reject("失败原因");
+  }
+});
 
+// 接收结果
+p.then(res => {
+  console.log(res);
+}).catch(err => {
+  console.log(err);
+}).finally(() => {
+  console.log("无论成功失败都会执行");
+});
+```
 
+3. Promise 链式调用
+解决回调地狱，用 .then 竖着写，不嵌套
+```js
+new Promise((resolve) => resolve(1))
+.then(res => {
+  console.log(res);
+  return 2;
+})
+.then(res => {
+  console.log(res);
+  return 3;
+});
+```
+
+4. Promise 常用静态方法
+- Promise.all()
+所有都成功才成功，一个失败直接失败；适合并行请求。
+- Promise.race()
+谁先完成就用谁的结果，赛跑机制。
+-Promise.allSettled()	
+全部完成后返回每个结果的描述
+- Promise.any	
+第一个成功的 Promise 的结果
+- Promise.resolve()
+直接返回成功的 Promise
+- Promise.reject()
+直接返回失败的 Promise
+
+# 十六. async /await
+是 Promise 的语法糖，让异步代码写成同步写法，不用 .then 链式。
+1. 基础用法
+- async 修饰函数，函数内部可以用 await
+- await 后面必须跟 Promise
+- await 会等待异步完成，再往下执行
+```js
+// 封装一个Promise函数
+function getData() {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve("拿到数据");
+    }, 1000);
+  });
+}
+
+// async await 使用
+async function fn() {
+  console.log("开始");
+  // 等待异步完成
+  const res = await getData();
+  console.log(res);
+  console.log("结束");
+}
+
+fn();
+```
+
+2. 异常捕获
+await 报错要用 try / catch
+```js
+async function fn() {
+  try {
+    const res = await getData();
+    console.log(res);
+  } catch (err) {
+    console.log("出错了", err);
+  }
+}
+```
+
+3.串行 & 并行
+- 多个 await 挨个写 → 串行（按顺序执行）
+- 配合 Promise.all → 并行（同时执行）
+```js
+// 串行
+// 多个独立的 await 会等前一个完成后再执行后一个，总耗时是所有任务耗时之和。
+// 模拟异步任务：延迟返回，参数为耗时(ms)
+function delay(ms, value) {
+  return new Promise(resolve => setTimeout(() => resolve(value), ms));
+}
+
+(async () => {
+  console.time('串行总耗时');
+
+  const result1 = await delay(1000, '任务一完成');  // 等 1 秒
+  const result2 = await delay(1000, '任务二完成');  // 再等 1 秒
+  const result3 = await delay(1000, '任务三完成');  // 再等 1 秒
+
+  console.log(result1, result2, result3);
+  console.timeEnd('串行总耗时'); // 约 3000ms
+})();
+```
+
+```js
+// 并行
+// 把所有异步任务同时启动，然后 await Promise.all([...]) 等它们都完成，总耗时为其中最慢的那个。
+(async () => {
+  console.time('并行总耗时');
+
+  const p1 = delay(1000, '任务一完成');
+  const p2 = delay(1000, '任务二完成');
+  const p3 = delay(1000, '任务三完成');
+
+  // 三个任务几乎同时启动，一起等待
+  const [result1, result2, result3] = await Promise.all([p1, p2, p3]);
+
+  console.log(result1, result2, result3);
+  console.timeEnd('并行总耗时'); // 约 1000ms
+})();
+```
+
+# 十七. 事件循环
+- JS 执行顺序：同步代码 → 微任务 → 宏任务
+- 宏任务：定时器、AJAX、事件
+- 微任务：Promise.then/catch、async/await
+
+# 十七. 原生 AJAX & Fetch 
+1. 原生AJAX
+- 创建 XMLHttpRequest 对象
+- 初始化请求
+- 监听状态变化
+- 发送请求
+
+2. Fetch
+浏览器原生网络请求，基于 Promise：
+```js
+fetch("https://xxx.com/api")
+.then(res => res.json())
+.then(data => console.log(data))
+.catch(err => console.log(err));
+```
 
 
 
