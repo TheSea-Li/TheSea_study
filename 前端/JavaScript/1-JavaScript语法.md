@@ -63,12 +63,33 @@ Math.random();
 Math.floor(Math.random() * 10) + 1;
 ```
 
-## 4. 其它常用
+## 4. 保留指定小数
+```js
+let num = 3.1415926;
+num.toFixed(2)  // "3.14"  返回字符串
+num.toFixed(3)  // "3.142"
+
+Number(num.toFixed(2))  // 返回字符串，需要数字转一下
 ```
+
+## 5. 其它常用
+```js
 Math.abs(-5);    // 绝对值 5
 Math.pow(2,3);   // 幂 2的3次方=8
 Math.sqrt(9);    // 开平方 3
 ```
+## 6. 字符串转数字
+```js
+// 1. Number 转换
+Number('123')   // 123
+Number('123abc')// NaN
+
+// 2. parseInt 只取开头数字
+parseInt('123abc') // 123
+parseInt('abc123') // NaN
+
+```
+
 
 # 四. Date日期对象
 ## 1. 创建日期对象
@@ -1177,6 +1198,242 @@ function deepClone(obj) {
   return newObj;
 }
 ```
+
+# 二十六. 字符串常用方法
+- trim()
+去除首尾空格
+```js
+'  张三  '.trim() // '张三'
+```
+
+- split('分隔符)
+字符串转数组
+```js
+'1-2-3'.split('-') // [1,2,3]
+```
+
+- replace() 
+替换字符
+```js
+'hello'.replace('l','x') // 'hexlo'
+// str.replace(匹配内容, 替换内容)。配合正则可全局替换
+```
+
+- includes() 
+是否包含某字符，返回布尔
+```js
+'abc'.includes('b') // truec
+```
+- substring()
+字符串截取方法
+substring(start, end) 提取从 start 到 end（不包括 end）之间的字符。如果省略 end，则提取到字符串末尾。
+**特点**
+不允许负数（负数会被当成 0）。
+如果 start > end，会自动交换两个参数。
+```js
+const str = 'JavaScript';
+console.log(str.substring(0, 4));   // "Java"
+console.log(str.substring(4));      // "Script"（从索引4到末尾）
+console.log(str.substring(4, 1));   // "ava"（自动交换成(1,4)）
+console.log(str.substring(-5, 4));  // "Java"（-5被当成0）
+```
+
+- slice(start, end)
+提取从 start 到 end（不包括 end）的字符。
+**特点**：
+支持负数，负数表示从末尾往前数。
+如果 start > end，不会交换，直接返回空字符串。
+```js
+const str = 'JavaScript';
+
+console.log(str.slice(0, 4));      // "Java"
+console.log(str.slice(4));         // "Script"
+console.log(str.slice(4, 1));      // ""（start > end，返回空）
+console.log(str.slice(-6, -1));    // "Scrip"（从倒数第6到倒数第1）
+console.log(str.slice(-1));        // "t"（最后一个字符）
+```
+> 取字符串片段，首选 slice。
+
+- startsWith ()
+判断字符串是否以指定内容开头
+```js
+// 基础用法
+let str = "hello world";
+
+console.log(str.startsWith("hello")); // true
+console.log(str.startsWith("hell"));  // true
+console.log(str.startsWith("world"));// false
+```
+```js
+// 第二个参数：起始索引
+// 从第几个下标开始，当作新的起点判断开头
+let str = "hello world";
+
+// 从下标6开始，往后是否以 "world" 开头
+console.log(str.startsWith("world", 6)); // true
+```
+
+- endsWith () 
+判断字符串是否以指定内容结尾
+```js
+//基础用法
+let str = "hello world";
+
+console.log(str.endsWith("world")); // true
+console.log(str.endsWith("ld"));    // true
+console.log(str.endsWith("hello")); // false
+```
+```js
+//第二个参数：限定截取长度
+// 只看前 n 个字符，再判断结尾
+let str = "hello world";
+
+// 只看前5个字符：hello，是否以 "llo" 结尾
+console.log(str.endsWith("llo", 5)); // true
+```
+
+**实际开发场景**
+1. 判断链接是否以 http/https 开头
+```js
+let url = "https://www.baidu.com";
+if(url.startsWith("https")){
+  console.log("安全链接");
+}
+```
+
+2. 判断文件后缀
+```js
+let fileName = "photo.jpg";
+if(fileName.endsWith(".jpg") || fileName.endsWith(".png")){
+  console.log("是图片文件");
+}
+```
+
+3. 判断路径前缀
+```js
+let path = "/api/user/list";
+if(path.startsWith("/api")){
+  console.log("接口请求路径");
+}
+```
+
+# 二十七. 本地存储 Storage
+1. 两种存储区别
+- localStorage：永久存储，关闭浏览器也还在
+- sessionStorage：会话存储，关闭当前标签页自动清空
+
+2. 四个原生 API
+```js
+// 存
+localStorage.setItem('name','小明')
+// 取
+localStorage.getItem('name')
+// 删单个
+localStorage.removeItem('name')
+// 清空全部
+localStorage.clear()
+```		
+
+3. 重点：只能存字符串
+存对象 / 数组必须转 JSON
+```js
+// 存：对象转字符串
+localStorage.setItem('user', JSON.stringify({name:'张三'}))
+
+// 取：字符串转回对象
+let user = JSON.parse(localStorage.getItem('user'))
+```	
+
+# 二十八. 正则表达式
+只掌握业务校验够用即可
+1. 正则字面量写法
+```js
+let reg = /规则/修饰符
+// 修饰符：g全局匹配  i忽略大小写
+```
+
+2. 常用校验方法
+test() 匹配是否符合规则，返回 true/false
+```js
+let reg = /^1\d{10}$/
+reg.test('13800138000') // 手机号校验
+```
+
+3. 必背常用正则
+- 手机号：/^1[3-9]\d{9}$/
+- 邮箱：/^\w+@\w+\.\w+$/
+- 纯数字：/^\d+$/
+- 6-16 位密码：/^.{6,16}$/
+
+
+# 二十九. 防抖 & 节流
+### 防抖 Debounce
+频繁触发时，每次都重新计时；只有停止触发后，等待指定时间没再触发，才执行一次。
+**适用场景**
+- 搜索框输入联想（边打字不请求，停下再请求）
+- 输入框格式校验
+- 浏览器窗口 resize 缩放
+- 鼠标悬浮频繁触发
+
+**示例**
+```js
+// fn：要防抖的函数，delay：延迟时间
+function debounce(fn, delay) {
+  let timer = null;
+  return function(...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      fn.apply(this, args);
+    }, delay);
+  }
+}
+
+// 使用
+function search(val) {
+  console.log('搜索：', val);
+}
+// 生成防抖后的函数
+const debounceSearch = debounce(search, 500);
+```
+
+### 节流 Throttle
+固定时间间隔内，不管触发多少次，只执行一次。
+**使用场景**
+- 页面滚动 scroll 监听
+- 鼠标移动 mousemove
+- 拖拽、页面加载监听
+- 防止按钮短时间重复提交（防连点）
+
+**示例**
+```js
+function throttle(fn, delay) {
+  let timer = null;
+  return function(...args) {
+    if(timer) return;
+    timer = setTimeout(() => {
+      fn.apply(this, args);
+      timer = null;
+    }, delay);
+  }
+}
+
+// 使用
+function handleScroll() {
+  console.log('滚动逻辑');
+}
+window.addEventListener('scroll', throttle(handleScroll, 300));
+```
+
+
+
+
+
+
+
+
+
+
+
 
 
 
