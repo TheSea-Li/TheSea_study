@@ -225,6 +225,217 @@ function add(a:number,b:number) {
 // TS自动推导出返回值是number
 ```
 
+# 十四、 元组（Tuple）
+TS 特有的「固定长度 + 固定类型」的数组，常用于函数返回值、多值场景（比如坐标、键值对），比普通数组
+```ts
+// 语法：[类型1, 类型2, ...]
+let point: [number, number] = [100, 200]; // 二维坐标（固定2个数字）
+let userInfo: [string, number] = ["张三", 22]; // 姓名+年龄
+
+// 越界赋值报错
+point.push(300); // 虽然能push（历史兼容），但访问 point[2] 会提示类型错误
+// 解构也能精准推导类型
+const [x, y] = point; // x: number，y: number
+```
+
+# 十五、可选链操作符（?.）
+处理嵌套对象的可选属性 / 可能为 null/undefined 的值，避免 Cannot read property 'xxx' of undefined 报错，TS 中高频使用。
+```ts
+interface User {
+  info?: { // 可选属性
+    address?: string;
+  };
+}
+
+const u: User = {};
+// 不用可选链：需要层层判断，代码冗余
+console.log(u.info && u.info.address); 
+// 用可选链：简洁，不存在则返回 undefined
+console.log(u.info?.address); 
+
+// 也可用于函数/数组
+const fn: (() => number) | undefined = undefined;
+fn?.(); // 函数不存在则不执行，无报错
+
+const arr: number[] | undefined = undefined;
+arr?.[0]; // 数组不存在则返回 undefined
+```
+
+# 十五、空值合并操作符（??）
+解决 || 把 0、''、false 等「假值」误判为空的问题，仅对 null/undefined 生效，更精准。
+```ts
+// 需求：如果有值就用，无值（null/undefined）默认给 0
+let num1 = 0;
+console.log(num1 || 10); // 错误：0 被||判定为假，返回10
+console.log(num1 ?? 10); // 正确：0 不是null/undefined，返回0
+
+let num2: number | undefined = undefined;
+console.log(num2 ?? 10); // 返回10
+```
+
+# 十六、接口 vs 类型别名（核心区别）
+ type 和 interface 相似，其核心区别是面试 / 开发中高频问题
+![type和interface区别]('../Images/TS_image2.png')
+```ts
+// 1. interface 可合并
+interface User { id: number }
+interface User { name: string }
+// 最终 User = { id: number; name: string }
+
+// 2. type 不可重复
+type User = { id: number }
+type User = { name: string } // 报错：标识符“User”重复
+
+// 3. 拓展对比
+// interface 继承
+interface A { a: number }
+interface B extends A { b: string }
+
+// type 交叉
+type A = { a: number }
+type B = A & { b: string }
+```
+
+# 十七、非空断言（!）
+手动告诉 TS：「这个值一定不是 null/undefined」，和 as 断言不同（as 是指定类型，! 是排除空值）
+```ts
+// 场景：TS 认为 input 可能为 null，但你确定 DOM 一定存在
+const input = document.getElementById("input")!; 
+console.log(input.value); // 不用写 as 也能直接用
+
+// 函数参数非空断言
+function fn(val: string | undefined) {
+  console.log(val!.length); // ! 断言 val 不是 undefined
+}
+```
+
+# 十八、never 类型
+表示「永不存在的值的类型」，比如：抛出错误的函数、无限循环的函数、联合类型的「穷尽检查」。
+```ts
+// 1. 抛出错误的函数返回值
+function throwError(msg: string): never {
+  throw new Error(msg); // 永远不会执行到 return，返回 never
+}
+
+// 2. 穷尽检查（确保联合类型所有情况都被处理）
+type Status = "success" | "fail";
+function handleStatus(s: Status) {
+  switch (s) {
+    case "success": break;
+    case "fail": break;
+    default:
+      // 如果漏写 case，这里会提示：s 是 never 类型（无剩余值）
+      const _exhaustiveCheck: never = s;
+      throw new Error(`未知状态：${_exhaustiveCheck}`);
+  }
+}
+```
+
+# 十九、readonly 只读修饰符
+标记属性 / 数组为「只读」，防止意外修改，TS 编译时校验（编译后无限制）。
+```ts
+// 1. 接口/对象的只读属性
+interface User {
+  readonly id: number; // 只读，不可修改
+  name: string;
+}
+const u: User = { id: 1, name: "张三" };
+u.id = 2; // 报错：id 是只读属性
+
+// 2. 只读数组
+const arr: readonly number[] = [1,2,3];
+arr.push(4); // 报错：只读数组无 push 方法
+// 简写：ReadonlyArray<类型>
+const list: ReadonlyArray<string> = ["a","b"];
+```
+
+# 二十、索引签名
+```ts
+// 需求：对象的键是任意字符串，值是数字（比如统计分数）
+interface ScoreObj {
+  [key: string]: number; // 索引签名：key 是 string 类型，值是 number
+  math?: number; // 可加固定属性（类型要匹配）
+}
+
+const score: ScoreObj = {
+  chinese: 90,
+  math: 88,
+  english: 95 // 任意键名，值必须是数字
+};
+```
+
+# 二十一、函数重载
+同一函数支持「不同参数类型 / 参数个数」的调用方式，让函数类型更精准（TS 编译后会忽略重载声明，仅保留实现）。
+```ts
+// 1. 重载声明（定义不同的入参+返回值）
+function add(a: number, b: number): number;
+function add(a: string, b: string): string;
+
+// 2. 函数实现（需兼容所有重载场景）
+function add(a: any, b: any): any {
+  return a + b;
+}
+
+// 调用：TS 会根据参数类型推导返回值
+add(1, 2); // 返回 number
+add("1", "2"); // 返回 string
+add(1, "2"); // 报错：无匹配的重载
+```
+
+# 二十二、typeof 类型查询
+从「变量 / 对象」上提取类型，减少重复定义，实现「类型和值联动」。
+```ts
+// 场景：已有一个对象，想复用它的类型
+const user = { id: 1, name: "张三", age: 22 };
+// 用 typeof 提取 user 的类型
+type User = typeof user; // 等价于 { id: number; name: string; age: number }
+
+const u: User = { id: 2, name: "李四", age: 23 }; // 精准匹配
+
+// 也可提取函数类型
+function add(a: number, b: number) { return a + b; }
+type AddFn = typeof add; // (a: number, b: number) => number
+```
+
+# 二十三、keyof 类型操作符
+提取「类型 / 接口」的所有键名，返回联合字面量类型，常用于泛型 + 对象操作。
+```ts
+interface User { id: number; name: string; age: number }
+// keyof User → "id" | "name" | "age"
+type UserKeys = keyof User; 
+
+// 泛型+keyof 实现：安全访问对象属性
+function getProp<T, K extends keyof T>(obj: T, key: K) {
+  return obj[key];
+}
+
+const u: User = { id: 1, name: "张三", age: 22 };
+getProp(u, "name"); // 正确，返回 string
+getProp(u, "gender"); // 报错：gender 不是 User 的键
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
